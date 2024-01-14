@@ -56,7 +56,7 @@ public class ExprNearestStructure extends SimpleExpression<Location> {
     @Nullable
     @Override
     protected Location[] get(Event e) {
-        if (structureTypeExpr == null || radiusExpr == null || centerExpr == null) return new Location[0];
+        if (structureNameExpr == null || radiusExpr == null || centerExpr == null) return new Location[0];
         String structureName = structureNameExpr.getSingle(e);
         if (structureName == null) return new Location[0];
             
