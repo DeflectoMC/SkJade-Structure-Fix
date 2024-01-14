@@ -59,12 +59,14 @@ public class ExprNearestStructure extends SimpleExpression<Location> {
         if (structureTypeExpr == null || radiusExpr == null || centerExpr == null) return new Location[0];
         String structureName = structureNameExpr.getSingle(e);
         if (structureName == null) return new Location[0];
+            
         String key = "minecraft";
         String path = structureName;
         if (structureName.indexOf(':') >= 0) {
                 key = structureName.split(":")[0];
                 path = structureName.split(":")[1];
         }
+            
         Structure structure = Registry.STRUCTURE.get(new NamespacedKey(key, path));
         Number number = radiusExpr.getSingle(e);
         Location center = centerExpr.getSingle(e);
