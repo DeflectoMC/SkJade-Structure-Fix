@@ -14,7 +14,7 @@ import com.ankoki.skjade.utils.Utils;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
-import org.bukkit.structure.Structure;
+import org.bukkit.generator.structure.Structure;
 import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
