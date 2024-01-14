@@ -16,6 +16,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.generator.structure.Structure;
 import org.bukkit.event.Event;
+import org.bukkit.util.StructureSearchResult;
 import org.eclipse.jdt.annotation.Nullable;
 
 @Name("Nearest Structure")
@@ -72,7 +73,11 @@ public class ExprNearestStructure extends SimpleExpression<Location> {
         Location center = centerExpr.getSingle(e);
         if (structure == null || number == null || center == null) return new Location[0];
         int radius = number.intValue();
-        return new Location[]{center.getWorld().locateNearestStructure(center, structure, radius, /*unexplored*/true)};
+        StructureSearchResult result = center.getWorld().locateNearestStructure(center, structure, radius, /*unexplored*/true);
+	if (result == null) {
+		return new Location[0];
+	}
+	return new Location[] {result.getLocation()};
     }
 
     @Override
@@ -87,7 +92,7 @@ public class ExprNearestStructure extends SimpleExpression<Location> {
 
     @Override
     public String toString(@Nullable Event e, boolean debug) {
-        return "closest structure of " + structureExpr.toString(e, debug) + " in radius " +
+        return "closest structure of " + structureNameExpr.toString(e, debug) + " in radius " +
                 radiusExpr.toString(e, debug) + " from " + centerExpr.toString(e, debug);
     }
 }
