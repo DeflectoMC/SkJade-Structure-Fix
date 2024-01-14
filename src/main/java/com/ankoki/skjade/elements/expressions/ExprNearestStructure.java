@@ -12,7 +12,9 @@ import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import com.ankoki.skjade.utils.Utils;
 import org.bukkit.Location;
-import org.bukkit.StructureType;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
+import org.bukkit.structure.Structure;
 import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -32,20 +34,20 @@ public class ExprNearestStructure extends SimpleExpression<Location> {
     static {
         if (Utils.getServerMajorVersion() > 12) {
             Skript.registerExpression(ExprNearestStructure.class, Location.class, ExpressionType.SIMPLE,
-                    "[the] (nearest|closest) (1¦(not |un)(explored|discovered)|) [structure [of]] %skjstructuretype% (in|within) [a] radius [of] %number% (around|at|from|of) %location%");
+                    "[the] (nearest|closest) (1¦(not |un)(explored|discovered)|) [structure [of]] %string% (in|within) [a] radius [of] %number% (around|at|from|of) %location%");
         }
     }
 
     //It seems as though it will always include unexplored anyway.
     //private boolean unexplored;
-    private Expression<StructureType> structureTypeExpr;
+    private Expression<String> structureNameExpr;
     private Expression<Number> radiusExpr;
     private Expression<Location> centerExpr;
 
     @Override
     public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
         //unexplored = parseResult.mark == 1;
-        structureTypeExpr = (Expression<StructureType>) exprs[0];
+        structureNameExpr = (Expression<String>) exprs[0];
         radiusExpr = (Expression<Number>) exprs[1];
         centerExpr = (Expression<Location>) exprs[2];
         return true;
@@ -55,12 +57,20 @@ public class ExprNearestStructure extends SimpleExpression<Location> {
     @Override
     protected Location[] get(Event e) {
         if (structureTypeExpr == null || radiusExpr == null || centerExpr == null) return new Location[0];
-        StructureType structureType = structureTypeExpr.getSingle(e);
+        String structureName = structureNameExpr.getSingle(e);
+        if (structureName == null) return new Location[0];
+        String key = "minecraft";
+        String path = structureName;
+        if (structureName.indexOf(':') >= 0) {
+                key = structureName.split(":")[0];
+                path = structureName.split(":")[1];
+        }
+        Structure structure = Registry.STRUCTURE.get(new NamespacedKey(key, path));
         Number number = radiusExpr.getSingle(e);
         Location center = centerExpr.getSingle(e);
-        if (structureType == null || number == null || center == null) return new Location[0];
+        if (structure == null || number == null || center == null) return new Location[0];
         int radius = number.intValue();
-        return new Location[]{center.getWorld().locateNearestStructure(center, structureType, radius, /*unexplored*/true)};
+        return new Location[]{center.getWorld().locateNearestStructure(center, structure, radius, /*unexplored*/true)};
     }
 
     @Override
@@ -75,7 +85,7 @@ public class ExprNearestStructure extends SimpleExpression<Location> {
 
     @Override
     public String toString(@Nullable Event e, boolean debug) {
-        return "closest structure of " + structureTypeExpr.toString(e, debug) + " in radius " +
+        return "closest structure of " + structureExpr.toString(e, debug) + " in radius " +
                 radiusExpr.toString(e, debug) + " from " + centerExpr.toString(e, debug);
     }
 }
